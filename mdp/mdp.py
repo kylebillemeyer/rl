@@ -1,6 +1,6 @@
 import numpy as np
 import itertools as it
-import random
+import utils
 
 class MDP():
     """Represents a Markov Decision Process"""
@@ -98,10 +98,10 @@ class MDP():
             prev = state
             choices = policy[state]
             # take a random action based on the policy probabilities
-            choice = self._randomArr(choices)
+            choice = utils.randomArr(choices)
             # transition state based on the probability for taking the
             # selected action at the current state
-            state = self._randomArr(self.probabilityMat[choice][state])
+            state = utils.randomArr(self.probabilityMat[choice][state])
             # collect reward for the action
             reward = self.rewards[choice][prev] * discount
             totalReward += reward
@@ -113,59 +113,5 @@ class MDP():
                 )
 
         return totalReward
-
-    def _randomArr(_, arr):
-        if (sum(arr) != 1.0):
-            raise ValueError('array distribution does not sum to 1')
-
-        cum_prob = np.cumsum(arr)
-        rand = random.random()
-
-        for i in range(len(cum_prob)):
-            if (rand < cum_prob[i]):
-                return i
-
-        raise ValueError('malformed array distribution')
-
-    def averageExpectedReward(self, state, numTrials, policy):
-        totalRewards = 0
-        for i in range(numTrials):
-            totalRewards += self.sample(state, policy)
-        print "average expected reward for {}: {}".format(state, totalRewards / numTrials)
-
-transitions = [
-    ('c1', 'facebook', 'distraction', 1.0, -1),
-    ('c1', 'study', 'c2', 1.0, -2),
-    ('distraction', 'facebook', 'distraction', 1.0, -1),
-    ('distraction', 'quit', 'c1', 1.0, 0),
-    ('c2', 'study', 'c3', 1.0, -2),
-    ('c2', 'sleep', 'rest', 1.0, 0),
-    ('c3', 'study', 'rest', 1.0, 10),
-    ('c3', 'pub', 'c1', 0.2, 1),
-    ('c3', 'pub', 'c2', 0.4, 1),
-    ('c3', 'pub', 'c3', 0.4, 1)
-]
-
-test_mdp = MDP(
-    ['c1', 'distraction', 'c2', 'c3', 'rest'],
-    ['facebook', 'quit', 'study', 'sleep', 'pub'],
-    transitions,
-    {'rest'},
-    1)
-
-test_policy = np.array([
-    (0.5, 0.0, 0.5, 0.0, 0.0),
-    (0.5, 0.5, 0.0, 0.0, 0.0),
-    (0.0, 0.0, 0.5, 0.5, 0.0),
-    (0.0, 0.0, 0.5, 0.0, 0.5),
-    (0.0, 0.0, 0.0, 1.0, 0.0),
-], dtype = float)
-
-#print test_mdp.sample('c2', test_policy, True)
-test_mdp.averageExpectedReward('c1', 10000, test_policy)
-test_mdp.averageExpectedReward('distraction', 10000, test_policy)
-test_mdp.averageExpectedReward('c2', 10000, test_policy)
-test_mdp.averageExpectedReward('c3', 10000, test_policy)
-test_mdp.averageExpectedReward('rest', 10000, test_policy)
 
 
