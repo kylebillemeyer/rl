@@ -19,11 +19,12 @@ class MDP():
 
         self.state_e = {states[i]: i for i in range(len(states))}
         self.action_e = {actions[i]: i for i in range(len(actions))}
-        encoded = self.endcodeTransistions(states, actions, transitions)
+        self.encoded = self.endcodeTransistions(states, actions, transitions)
 
-        num_states = len(states)
-        self.probabilityMat = [self.generateProbabilities(encoded, num_states, self.action_e[action]) for action in actions]
-        self.rewards = [self.generateRewards(encoded, num_states, self.action_e[action]) for action in actions]
+        self.num_states = len(states)
+        self.num_actions = len(actions)
+        self.probabilityMat = [self.generateProbabilities(self.encoded, self.num_states, self.action_e[action]) for action in actions]
+        self.rewards = [self.generateRewards(self.encoded, self.num_states, self.action_e[action]) for action in actions]
         self.discount = discount
 
     """
@@ -85,16 +86,16 @@ class MDP():
                 mat[from_state] = reward
         return mat
 
-    def sample(self, root, policy, debug=False):
+    def sample_path(self, root, policy, depth=-1, debug=False):
         state = self.state_e[root]
         prev = state
         discount = 1
-        totalReward = 0
+        count = 0
 
         # performance tweak to do integer equality instead of string
         encodedTerminals = {self.state_e[t] for t in self.terminals}
-
-        while(state not in encodedTerminals):
+        path = []
+        while(state not in encodedTerminals and (depth == -1 or count < depth)):
             prev = state
             choices = policy[state]
             # take a random action based on the policy probabilities
@@ -104,14 +105,21 @@ class MDP():
             state = utils.randomArr(self.probabilityMat[choice][state])
             # collect reward for the action
             reward = self.rewards[choice][prev] * discount
-            totalReward += reward
+            path.append((self.states[state], reward))
             discount *= self.discount
+            count += 1
 
             if debug:
                 print "In state {}, took action {} and moved to state {}, collecting {} reward".format(
                     self.states[prev], self.actions[choice], self.states[state], reward
                 )
 
-        return totalReward
+        return path
 
+    def sample(self, root, policy, depth=-1, debug=False):
+        path = self.sample_path(root, policy, depth, debug)
+        if not path:
+            return 0
+        
+        return reduce(lambda x, y: x + y, map(lambda x: x[1], path))
 

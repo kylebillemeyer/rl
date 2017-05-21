@@ -32,46 +32,22 @@ test_policy = np.array([
     (0.0, 0.0, 0.0, 1.0, 0.0),
 ], dtype = float)
 
-#print test_mdp.sample('c2', test_policy, True)
+#print mdpo.first_pass_monte_carlo(test_mdp, test_policy, 10000)
+#print mdpo.every_pass_monte_carlo(test_mdp, test_policy, 10000)
+#print mdpo.calc_value_func_dynamic(test_mdp, test_policy, 1000)
+print mdpo.temporal_difference(test_mdp, test_policy, 'c1', 0, .01, -1)
 
-"""
-mdpo.calc_expected_value_by_sampling(test_mdp, 'c1', 10000, test_policy)
-mdpo.calc_expected_value_by_sampling(test_mdp, 'distraction', 10000, test_policy)
-mdpo.calc_expected_value_by_sampling(test_mdp, 'c2', 10000, test_policy)
-mdpo.calc_expected_value_by_sampling(test_mdp, 'c3', 10000, test_policy)
-mdpo.calc_expected_value_by_sampling(test_mdp, 'rest', 10000, test_policy)
-"""
-"""
-print mdpo.calc_value_func_dynamic(test_mdp, test_policy, 1)
-print mdpo.calc_value_func_dynamic(test_mdp, test_policy, 10)
-print mdpo.calc_value_func_dynamic(test_mdp, test_policy, 100)
-print mdpo.calc_value_func_dynamic(test_mdp, test_policy, 1000)
-print mdpo.calc_value_func_dynamic(test_mdp, test_policy, 10000)
-"""
+width = 5
+height = 10
+gw = gridw.create_grid(width, height, [(0, 0), (width-1, height-1)], 1)
+gw_policy = np.zeros((4, height*width))
+gw_policy.fill(.25)
+gw_policy[:,0] = np.zeros((1, 4))
+gw_policy[:,height*width-1] = np.zeros((1, 4))
 
-gw = gridw.create_grid(4, 4, [(0, 0), (3, 3)], 1)
+#print gw_policy
 
-gw_policy = np.array([
-    (0, 0, 0, 0),
-    (.25, .25, .25, .25),
-    (.25, .25, .25, .25),
-    (.25, .25, .25, .25),
-    (.25, .25, .25, .25),
-    (.25, .25, .25, .25),
-    (.25, .25, .25, .25),
-    (.25, .25, .25, .25),
-    (.25, .25, .25, .25),
-    (.25, .25, .25, .25),
-    (.25, .25, .25, .25),
-    (.25, .25, .25, .25),
-    (.25, .25, .25, .25),
-    (.25, .25, .25, .25),
-    (.25, .25, .25, .25),
-    (0, 0, 0, 0),
-], dtype = float)
-#print gw.states
-#print gw.actions
-#print gw.terminals
-#print gw.probabilityMat
-#print gw.rewards
-print mdpo.calc_value_func_dynamic(gw, gw_policy, 1)
+#print mdpo.calc_value_func_dynamic(gw, gw_policy, 1000)
+pstar = mdpo.optimized_policy_func(gw, gw_policy, 1000)
+#print pstar[0]
+#print pstar[1]
