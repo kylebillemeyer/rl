@@ -32,7 +32,7 @@ test_policy = np.array([
     (0.0, 0.0, 0.0, 1.0, 0.0),
 ], dtype = float)
 
-#print mdpo.first_pass_monte_carlo(test_mdp, test_policy, 10000)
+print mdpo.first_pass_monte_carlo(test_mdp, test_policy, 10000, .01)
 #print mdpo.every_pass_monte_carlo(test_mdp, test_policy, 10000)
 #print mdpo.calc_value_func_dynamic(test_mdp, test_policy, 1000)
 print mdpo.temporal_difference(test_mdp, test_policy, 'c1', 0, .01, -1)

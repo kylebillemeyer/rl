@@ -1,7 +1,7 @@
 import numpy as np
 
 """
-mdp * [N x A] * int -> [N x 1]: A model-free prediction algorithm that uses a
+mdp * [N x A] * int int -> [N x 1]: A model-free prediction algorithm that uses a
 first pass monte carlo solution to estimate the value function of an
 unknown. 
 
@@ -10,15 +10,14 @@ perform the operation on all states. In a real model-free scenario we would
 only know of states we've visited. The true purpose of this function would
 be to estimate the value of a given state.
 """
-def first_pass_monte_carlo(mdp, policy, numTrials):
+def first_pass_monte_carlo(mdp, policy, num_trials, learning_rate):
 	vpi = np.zeros(mdp.num_states)
 	for i in range(mdp.num_states):
 		state = mdp.states[i]
-		totalRewards = 0
 
-		for trial in range(numTrials):
-			totalRewards += mdp.sample(state, policy)
-			vpi[i] = totalRewards / numTrials
+		for trial in range(num_trials):
+			vpi[i] = temporal_difference(
+				mdp, policy, state, vpi[i], learning_rate, -1)
 	return vpi
 
 """
@@ -55,6 +54,19 @@ def every_pass_monte_carlo(mdp, policy, numTrials):
 		vpi[i] = running_average
 	return vpi
 
+"""
+mdp * [A x N] * state * float * float * int: Performs a single iteration
+temporal difference learning. Effectively, it provides a directional update
+of the value estimation for a given state. More specifically, the function
+estimates the the "target" value of the current state by running a trial with
+fixed look ahead (the number of actions to be taken is defined by
+learning_depth). It the determines the value error as the difference between
+the target value and the expected value. The expected value is updated in
+the direction of the error by a factor determined by learning_rate.
+
+Note, setting learning_depth to -1 will effectively make this a single trial
+monte-carlo simulation. Here, -1 means run until the look ahead terminates.
+"""
 def temporal_difference(mdp, policy, state, expected_value, learning_rate, learning_depth):
 	td_target = mdp.sample(state, policy, learning_depth)
 	td_error = td_target - expected_value
